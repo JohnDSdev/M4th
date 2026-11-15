@@ -114,7 +114,7 @@
     } catch (err) { return false; }
   }
   function validateCourse(course) {
-    if (!Array.isArray(course) || course.length !== 15) throw Error("Expected 15 Unit 2 lessons");
+    if (!Array.isArray(course) || course.length < 1 || course.length > 100) throw Error("Expected 1–100 lessons");
     var ids = new Set();
     course.forEach(function (l) {
       if (!l.id || !l.title || ids.has(l.id)) throw Error("Invalid or duplicate lesson");
