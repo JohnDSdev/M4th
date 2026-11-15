@@ -188,7 +188,7 @@
   }
   function visualBlock(l) {
     if(!l.visual)return "";
-    return '<div class="visual" id="visual"></div><small>Interactive-scale mathematical illustration. Graphs are generated from the lesson model.</small>';
+    return '<div class="visual" id="visual"></div><small>Graphs and diagrams are drawn locally from the lesson data.</small>';
   }
   function lesson() {
     var l=find(activeId);if(!l)return home();
@@ -277,7 +277,7 @@
       '<p>That marks the lesson proficient. A correct review after at least one day and another correct review after a later interval confirms mastery.</p>'+
       '<p>Use hints and worked solutions as often as you want. Hinted attempts help you learn but do not count toward mastery thresholds.</p></div>'+
       '<div class="panel"><h3>Import a course</h3><p>Paste a JSON course package with a <strong>lessons</strong> array following the same schema as Unit 2. Math expressions use the restricted template language, not executable JavaScript.</p>'+
-      '<textarea id="courseJson" rows="4" style="width:100%;background:#121823;color:var(--text);border:1px solid var(--stroke);border-radius:12px;padding:12px" placeholder="{&quot;id&quot;:&quot;my-course&quot;,&quot;title&quot;:&quot;My Course&quot;,&quot;lessons&quot;:[...]}"></textarea>'+
+      '<input id="courseFile" type="file" accept=".json,application/json" style="width:100%;margin:10px 0 12px;color:var(--muted)"><textarea id="courseJson" rows="4" style="width:100%;background:#121823;color:var(--text);border:1px solid var(--stroke);border-radius:12px;padding:12px" placeholder="{&quot;id&quot;:&quot;my-course&quot;,&quot;title&quot;:&quot;My Course&quot;,&quot;lessons&quot;:[...]}"></textarea>'+
       '<button class="btn" data-action="import" style="margin-top:10px">Validate and import</button></div>'+
       '<footer>Offline-first · No ads · No login · Your practice history stays on this device.</footer>';
   }
@@ -369,6 +369,14 @@
   });
   document.getElementById("app").addEventListener("change",function(event){
     var t=event.target;
+    if(t.id==="courseFile" && t.files && t.files[0]) {
+      var file=t.files[0];
+      if(file.size>250000) {notice="Course file exceeds the current 250 KB import limit.";drawNotice();return;}
+      var reader=new FileReader();
+      reader.onload=function(){var box=document.getElementById("courseJson");if(box)box.value=String(reader.result);notice="Course loaded. Tap Validate and import.";drawNotice();};
+      reader.onerror=function(){notice="Unable to read the selected file.";drawNotice();};
+      reader.readAsText(file);return;
+    }
     if(t.id==="reminder"||t.id==="reminderTime"){
       var cb=document.getElementById("reminder"),clock=document.getElementById("reminderTime");
       state.reminder=Boolean(cb&&cb.checked);
