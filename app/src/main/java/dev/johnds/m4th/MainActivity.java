@@ -12,12 +12,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
+import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -28,6 +30,7 @@ public class MainActivity extends Activity {
     private static final String PREFS = "m4th_progress_v1";
     private static final String CHANNEL = "study_reminders";
     private WebView web;
+    private ValueCallback<Uri[]> courseFileCallback;
     private final class Bridge {
         @JavascriptInterface public String load() {
             return getSharedPreferences(PREFS, MODE_PRIVATE).getString("state", "{}");
@@ -75,6 +78,22 @@ public class MainActivity extends Activity {
                 Log.i("M4thWeb", msg.message());
                 return true;
             }
+            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                                                        FileChooserParams parameters) {
+                if (courseFileCallback != null) courseFileCallback.onReceiveValue(null);
+                courseFileCallback = callback;
+                Intent select = new Intent(Intent.ACTION_GET_CONTENT);
+                select.setType("application/json");
+                select.addCategory(Intent.CATEGORY_OPENABLE);
+                try {
+                    startActivityForResult(select, 83);
+                    return true;
+                } catch (Exception error) {
+                    courseFileCallback.onReceiveValue(null);
+                    courseFileCallback = null;
+                    return false;
+                }
+            }
         });
         web.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -99,6 +118,15 @@ public class MainActivity extends Activity {
         if (next.getTimeInMillis() <= System.currentTimeMillis()) next.add(Calendar.DAY_OF_YEAR, 1);
         alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, next.getTimeInMillis(),
             AlarmManager.INTERVAL_DAY, pending);
+    }
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 83 && courseFileCallback != null) {
+            Uri[] selected = (resultCode == RESULT_OK && data != null && data.getData() != null)
+                ? new Uri[]{data.getData()} : null;
+            courseFileCallback.onReceiveValue(selected);
+            courseFileCallback = null;
+        }
     }
     @Override public void onBackPressed() {
         web.evaluateJavascript("window.m4thBack ? window.m4thBack() : false", result -> {
