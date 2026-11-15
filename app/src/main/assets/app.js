@@ -188,7 +188,7 @@
   }
   function visualBlock(l) {
     if(!l.visual)return "";
-    return '<div class="visual" id="visual"></div><small>Graphs and diagrams are drawn locally from the lesson's mathematical description.</small>';
+    return '<div class="visual" id="visual"></div><small>Graphs and diagrams are drawn locally from the lesson data.</small>';
   }
   function lesson() {
     var l=find(activeId);if(!l)return home();
