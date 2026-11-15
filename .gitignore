@@ -1,0 +1,7 @@
+.gradle/
+**/build/
+node_modules/
+app/src/main/assets/vendor/
+local.properties
+.idea/
+*.iml
