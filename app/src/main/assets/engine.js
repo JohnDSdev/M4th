@@ -32,6 +32,7 @@
         if (t === "log" && a.length === 1) return Math.log10(a[0]);
         if (t === "log" && a.length === 2) return Math.log(a[1])/Math.log(a[0]);
         if (t === "pow" && a.length === 2) return Math.pow(a[0],a[1]);
+        if (t === "round" && (a.length === 1 || a.length === 2)) { var places = a.length === 2 ? a[1] : 0; if (!Number.isInteger(places) || places < 0 || places > 8) throw Error("Invalid rounding"); var scale = Math.pow(10,places); return Math.round((a[0]+Number.EPSILON)*scale)/scale; }
         throw Error("Unsupported function: " + t);
       }
       if (t === "pi") return Math.PI;
